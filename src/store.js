@@ -74,7 +74,9 @@ export const useMainStore = defineStore('main', {
     },
     readLocalTasks(){
       let userTasks = localStorage.getItem('kanban')
-      this.$state.kanban = JSON.parse(userTasks)
+      if(userTasks){
+        this.$state.kanban = JSON.parse(userTasks)
+      }
     },
     deleteTask(taskType, taskId){
       const taskToDeleteIndex = this.$state.kanban[taskType].findIndex((val)=>taskId === val.id)
