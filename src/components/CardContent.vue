@@ -7,9 +7,14 @@
         group="a"
         :animation="200"
         @end="endMove"
+        :disabled="store.getSearchInProgress"
     >
         <b-card v-for="(task, index) in tasks[columnType]" :key="index" :title="task.title" class="task mb-2">
-            <b-card-sub-title class="mb-2">Due Date: {{ task.dueDate | getDateFormate }}</b-card-sub-title>
+            <b-card-sub-title class="mb-3" >
+                <span :class="lateDueDateReached(task.dueDate, columnType)">
+                    Due Date: {{ task.dueDate | getDateFormate }} 
+                </span>
+            </b-card-sub-title>
             <b-card-text>
                 {{ task.desc }}
             </b-card-text>
@@ -32,10 +37,10 @@
     </draggable>
 </template>
 <script>
-import {getTaskName} from "../utils/TaskTypes"
+import {getTaskName} from "@/utils/TaskTypes"
 import draggable from "vuedraggable";
 import { useMainStore } from '@/store.js';
-import {getFormattedDate} from "@/utils/dateFormate"
+import {getFormattedDate, isAfterOrEqualToday} from "@/utils/dateFormate"
 export default {
   name: 'card-content',
   setup () {
@@ -78,7 +83,24 @@ export default {
     },
     deleteTask(taskId, taskType){
         this.store.deleteTask(taskType,taskType)
+    },
+    lateDueDateReached(date, columnType){
+       return isAfterOrEqualToday(date) && columnType !== 'Done' ? 'card-content__date-blink' : ''
     }
   }
 }
 </script>
+<style lang="scss" scoped>
+.card-content{
+    &__date-blink{
+        color: red;
+        animation: blinker 2s linear infinite;
+        
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+    }
+}
+</style>

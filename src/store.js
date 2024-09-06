@@ -13,6 +13,7 @@ export const useMainStore = defineStore('main', {
         filteredKanban: null,
         filterCounter: 0,
         taskEdit: null,
+        searchInProgress: false,
 
 
         taskOldType: null,
@@ -33,6 +34,9 @@ export const useMainStore = defineStore('main', {
     },
     getFilterCounter(state){
       return state.filterCounter
+    },
+    getSearchInProgress(state){
+      return state.searchInProgress
     }
   },
   actions: {
@@ -80,6 +84,7 @@ export const useMainStore = defineStore('main', {
     searchTasks(searchKeyword){
       this.$state.filterCounter = 0
       if(searchKeyword.length){
+        this.$state.searchInProgress = true
         const result = Object.keys(this.$state.kanban).reduce((acc, key) => {
           const filteredTasks = this.$state.kanban[key].filter(task => 
               task.title.toLowerCase().includes(searchKeyword.toLowerCase()) || 
@@ -94,6 +99,7 @@ export const useMainStore = defineStore('main', {
         this.$state.filteredKanban = result.filteredKanbanBoard
         this.$state.filterCounter= result.count
       }else{
+        this.$state.searchInProgress = false
         this.$state.filteredKanban = null
       }
     }

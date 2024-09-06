@@ -5,13 +5,13 @@
             <b-row class="my-1">
                 <b-form-group label-cols="4" label-cols-lg="2" label-for="title">
                     <label for="title">Title:</label>
-                    <b-form-input id="title" placeholder="Title" size="sm" type="text" required v-model="task.title"></b-form-input>
+                    <b-form-input id="title" placeholder="Title" size="sm" type="text" required v-model.trim="task.title"></b-form-input>
                 </b-form-group>
             </b-row>
             <b-row class="my-1">
                 <b-form-group label-cols="4" label-cols-lg="2" label-for="desc">
                     <label for="desc">Description:</label>
-                    <b-form-textarea id="desc" placeholder="Description" size="sm" type="text" max-rows="5" required v-model="task.desc"></b-form-textarea>
+                    <b-form-textarea id="desc" placeholder="Description" size="sm" type="text" max-rows="5" required v-model.trim="task.desc"></b-form-textarea>
                 </b-form-group>
             </b-row>
             <b-row class="my-1">

@@ -1,3 +1,5 @@
+// for all date manipulation for whole app
+
 // const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 const today  = new Date();
 
@@ -13,4 +15,9 @@ export function getFormattedDate(date){
         month: "long",
         day: "numeric",
       }).format(currentDate);
+}
+
+export function isAfterOrEqualToday(date) {
+  const today = new Date();
+  return getFormattedDate(date) >= getFormattedDate(today);
 }
