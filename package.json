@@ -12,6 +12,8 @@
     "bootstrap": "^5.3.3",
     "bootstrap-vue": "^2.23.1",
     "core-js": "^3.8.3",
+    "generate-unique-id": "^2.0.3",
+    "lodash.debounce": "^4.0.8",
     "pinia": "^2.2.2",
     "vue": "^2.6.14",
     "vuedraggable": "^2.24.3"

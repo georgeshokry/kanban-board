@@ -1,6 +1,5 @@
 <template>
     <b-container fluid>
-      >>>{{ store.getTaskEdit }}
       <b-row class="py-5">
         <b-col lg="3" sm="12" class="mb-3">
           <kanban-column column-type="Todo" :tasks="allKanban"></kanban-column>
@@ -39,8 +38,20 @@ export default {
     getKanban(){
       return this.store.getKanban
     },
+    getFilteredKanban(){
+      return this.store.getFilteredKanban
+    }
   },
-  mounted(){
+  watch:{
+    getFilteredKanban:{
+      handler(newVal){
+        newVal ? this.allKanban = newVal : this.allKanban = this.getKanban
+      }
+    }
+  },
+  created(){
+    // read old tasks from user localstorage
+    this.store.readLocalTasks()
     this.allKanban = this.getKanban
   },
   methods:{

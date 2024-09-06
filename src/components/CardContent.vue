@@ -6,13 +6,14 @@
         draggable=".task"
         group="a"
         :animation="200"
-        @change="log"
+        @end="endMove"
     >
         <b-card v-for="(task, index) in tasks[columnType]" :key="index" :title="task.title" class="task mb-2">
+            <b-card-sub-title class="mb-2">Due Date: {{ task.dueDate | getDateFormate }}</b-card-sub-title>
             <b-card-text>
                 {{ task.desc }}
             </b-card-text>
-            Due Date: {{ task.dueDate }}
+            
             <template #footer>
                 <b-row class="justify-content-between">
                     <b-col cols="auto">
@@ -21,7 +22,7 @@
                         </b-button>
                     </b-col>
                     <b-col cols="auto">
-                        <b-button variant="danger " size="sm" >
+                        <b-button variant="danger " size="sm" @click="deleteTask(task.id, columnType)">
                             <b-icon icon="trash" aria-hidden="true" ></b-icon>
                         </b-button>
                     </b-col>
@@ -34,6 +35,7 @@
 import {getTaskName} from "../utils/TaskTypes"
 import draggable from "vuedraggable";
 import { useMainStore } from '@/store.js';
+import {getFormattedDate} from "@/utils/dateFormate"
 export default {
   name: 'card-content',
   setup () {
@@ -44,25 +46,38 @@ export default {
     draggable
   },
   props:{
-    columnType:{
-        type: String,
-        default: 'Todo',
-        validator: function (value) {
-            const taskNames = getTaskName()
-            return taskNames.includes(value)
+      columnType:{
+          type: String,
+          default: 'Todo',
+          validator: function (value) {
+              const taskNames = getTaskName()
+              return taskNames.includes(value)
+            },
+            required: true
         },
-        required: true
+        tasks:{
+            type:Object,
+        }
     },
-    tasks:{
-      type:Object,
-    }
-  },
+    filters:{
+        getDateFormate(value){
+            return getFormattedDate(value)
+        }
+
+    },
   methods:{
-    log(data){
-      console.log("🚀 ~ log ~ data:", data, this.columnType)
+    endMove(){
+        this.$nextTick(()=>{
+            this.store.editNewTask()
+
+        })
     },
     editTask(task){
         this.store.taskEdit = task
+        this.$bvModal.show('addTaskModal')
+    },
+    deleteTask(taskId, taskType){
+        this.store.deleteTask(taskType,taskType)
     }
   }
 }

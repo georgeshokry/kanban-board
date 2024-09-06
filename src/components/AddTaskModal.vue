@@ -1,5 +1,5 @@
 <template> 
-    <b-modal ref="addTaskModal"  id="addTaskModal" title="Add/Edit Task" hide-header-close hide-footer>
+    <b-modal ref="addTaskModal"  id="addTaskModal" title="Add/Edit Task" hide-header-close hide-footer @show="onOpeningModal">
         <b-form @submit="onSubmitTask" @reset="onResetTaskForm">
         <b-container fluid>
             <b-row class="my-1">
@@ -17,7 +17,7 @@
             <b-row class="my-1">
                 <b-form-group label-cols="4" label-cols-lg="2" label-for="dueDate">
                     <label for="dueDate">Due Date:</label>
-                    <b-form-input id="dueDate"  placeholder="Due Date" size="sm" type="date" required v-model="task.dueDate"></b-form-input>
+                    <b-form-input id="dueDate"  placeholder="Due Date" size="sm" type="date" required v-model="task.dueDate" :min="todayDate"></b-form-input>
                 </b-form-group>
             </b-row>
             <b-row class="my-1">
@@ -46,7 +46,8 @@
     </b-modal>
 </template>
 <script>
-import {getTaskName} from "../utils/TaskTypes"
+import {getTaskName} from "@/utils/TaskTypes"
+import {getToday} from "@/utils/dateFormate"
 import { useMainStore } from '@/store.js';
   export default {
     name:'add-task-modal',
@@ -60,8 +61,9 @@ import { useMainStore } from '@/store.js';
                 title: '',
                 desc: '',
                 dueDate: '',
-                type: 'Todo'
-            }
+                type: ''
+            },
+            oldTaskType: ''
         }
     },
     computed:{
@@ -72,14 +74,8 @@ import { useMainStore } from '@/store.js';
         getTaskEdit(){
             return this.store.getTaskEdit
         },
-    },
-    watch:{
-        getTaskEdit:{
-            handler(newVal){
-                console.log("🚀 ~ handler ~ newVal:", newVal)
-                this.task = newVal
-                this.showModal()
-            },
+        todayDate(){
+            return getToday()
         }
     },
     mounted(){
@@ -93,14 +89,18 @@ import { useMainStore } from '@/store.js';
         this.$refs['addTaskModal'].hide()
       },
       toggleModal() {
-        // We pass the ID of the button that we want to return focus to
-        // when the modal has hidden
         this.$refs['addTaskModal'].toggle('#toggle-btn')
       },
       onSubmitTask(e){
         e.preventDefault()
-        console.log("🚀 ~ onSubmitTask ~ e:", this.task)
-        
+        //this mean that there is task to be edit
+        if(this.store.taskEdit && Object.keys(this.store.taskEdit).length > 0){
+            this.store.editTask(this.task.id, this.oldTaskType, this.task)
+        }else{
+            // mean that its a new task
+            this.store.addNewTask(this.task.type, this.task)
+        }
+        this.onResetTaskForm(e)
       },
       onResetTaskForm(e){
         e.preventDefault()
@@ -109,6 +109,13 @@ import { useMainStore } from '@/store.js';
             desc: '',
             dueDate: '',
             type: 'Todo'
+        }
+        this.hideModal()
+      },
+      onOpeningModal(){
+        if(this.getTaskEdit){
+            this.oldTaskType = this.getTaskEdit.type
+            this.task = this.getTaskEdit
         }
       }
     },

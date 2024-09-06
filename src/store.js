@@ -1,15 +1,24 @@
 import { defineStore } from 'pinia';
+const generateUniqueId = require('generate-unique-id');
 
 export const useMainStore = defineStore('main', {
   state: () => {
     return {
         kanban: {
-            'Todo': [{ id: 1, title: 'Task 1', desc: 'desc', dueDate: '01-12-2024', type: 'Todo', priority: 'high', order:0 }],
-            'Inprogress': [{ id: 2, title: 'Task 2', desc: 'desc', dueDate: '01-12-2024', type: 'Inprogress', priority: 'high', order: 0 }],
-            'InReview': [{ id: 3, title: 'Task 3', desc: 'desc', dueDate: '01-12-2024', type: 'InReview', priority: 'high', order: 0 }],
-            'Done': [{ id: 4, title: 'Task 4', desc: 'desc', dueDate: '01-12-2024', type: 'Done', priority: 'high', order: 0 }]
+            'Todo': [],
+            'Inprogress': [],
+            'InReview': [],
+            'Done': []
         },
-        taskEdit: {}
+        filteredKanban: null,
+        filterCounter: 0,
+        taskEdit: null,
+
+
+        taskOldType: null,
+        taskNewType: null,
+        taskOldIndex: null,
+        taskNewIndex: null
     };
   },
   getters: {
@@ -17,18 +26,76 @@ export const useMainStore = defineStore('main', {
       return state.kanban;
     },
     getTaskEdit(state){
-      console.log("🚀 ~ getTaskEdit ~ state:", state.taskEdit)
       return state.taskEdit;
+    },
+    getFilteredKanban(state){
+      return state.filteredKanban
+    },
+    getFilterCounter(state){
+      return state.filterCounter
     }
   },
   actions: {
-    addNewTask(taskType){
-      this.$state.kanban[taskType].push({
-          id: 6516512, title: 'Task 6516512', desc: 'desc', dueDate: '01-12-2024' 
+    addNewTask(taskType, task){
+      this.$state.kanban[taskType].push({...task, order: 0, priority: 'high', 
+        id: generateUniqueId({
+          length: 8,
+          useLetters: false
+        })
       })
+      this.saveToLocal()
     },
-    changeTaskTypeOrder(task){
-      this.$state.kanban[task.Type]
+    editTask(taskId, oldTaskType,taskData){
+      const taskToEditIndex = this.$state.kanban[oldTaskType].findIndex((val)=>taskId === val.id)
+      if(oldTaskType !== taskData.type){
+        this.$state.kanban[oldTaskType].splice(taskToEditIndex, 1);
+        this.$state.kanban[taskData.type].push(taskData)
+      }else{
+        this.$state.kanban[oldTaskType][taskToEditIndex] = taskData
+      }
+      this.$state.taskEdit = null
+      this.saveToLocal()
+    },
+    editOldTaskType(taskOldIndex, taskNewIndex, taskOldType, taskNewType){
+      this.$state.taskOldIndex = taskOldIndex
+      this.$state.taskNewIndex = taskNewIndex
+      this.$state.taskOldType = taskOldType
+      this.$state.taskNewType = taskNewType
+    },
+    editNewTask(){
+      this.saveToLocal()
+    },
+    saveToLocal(){
+      localStorage.setItem('kanban', JSON.stringify(this.$state.kanban))
+    },
+    readLocalTasks(){
+      let userTasks = localStorage.getItem('kanban')
+      this.$state.kanban = JSON.parse(userTasks)
+    },
+    deleteTask(taskType, taskId){
+      const taskToDeleteIndex = this.$state.kanban[taskType].findIndex((val)=>taskId === val.id)
+      this.$state.kanban[taskType].splice(taskToDeleteIndex, 1);
+      this.saveToLocal()
+    },
+    searchTasks(searchKeyword){
+      this.$state.filterCounter = 0
+      if(searchKeyword.length){
+        const result = Object.keys(this.$state.kanban).reduce((acc, key) => {
+          const filteredTasks = this.$state.kanban[key].filter(task => 
+              task.title.toLowerCase().includes(searchKeyword.toLowerCase()) || 
+              task.desc.toLowerCase().includes(searchKeyword.toLowerCase())
+          );
+          
+          acc.filteredKanbanBoard[key] = filteredTasks;
+          acc.count += filteredTasks.length;
+          
+          return acc;
+      }, { filteredKanbanBoard: {}, count: 0 });
+        this.$state.filteredKanban = result.filteredKanbanBoard
+        this.$state.filterCounter= result.count
+      }else{
+        this.$state.filteredKanban = null
+      }
     }
   }
 });

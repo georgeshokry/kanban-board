@@ -21,6 +21,7 @@
             </b-row>
           </template>
           <card-content :columnType="columnType" :tasks="tasks"></card-content>
+          <em v-if="!tasks[columnType].length">No Tasks Here</em>
         </b-card>
   </b-card-group>
 </template>
